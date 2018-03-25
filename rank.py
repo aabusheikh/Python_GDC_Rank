@@ -18,8 +18,8 @@ def col_rank_genes():
         df = pd.read_csv(combined_file_path, sep="\t", index_col=0)
 
         column_ranks_file = os.path.join(cmn.DL_DIR, cmn.COL_RANK_FNAME)
-        col_ranks = pd.DataFrame()
-        i = 0
+        col_ranks = pd.DataFrame(index=df.index, columns=df.columns)
+        #i = 0
 
         for col in df.columns:
             logging.info("Generating rankings for '%s' ..." % col)
@@ -30,9 +30,12 @@ def col_rank_genes():
                     col_rank_dict[row] = abs(float(df.loc[row][col]))
                 else:
                     col_rank_dict[row] = 0
-            col_rank = sorted(col_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
-            col_ranks.insert(i, col, [t[0] for t in col_rank])
-            i += 1
+
+            col_rank = enumerate(sorted(col_rank_dict.items(), key=operator.itemgetter(1), reverse=True))
+            #col_ranks.insert(i, col, [t[0] for t in col_rank])
+            # i += 1
+            for r, t in col_rank:
+                col_ranks.loc[t[0]][col] = r
 
             logging.info("Done.\n")
 
@@ -41,10 +44,61 @@ def col_rank_genes():
         logging.info("Done.\n")
 
     else:
-        logging.warning("Combined PTEN correlation file not found.")
+        logging.warning("Combined PTEN correlation file not found.\n")
 
 
-def run():
+def global_rank_genes():
+    """
+
+    :return:
+    """
+    column_ranks_file = os.path.join(cmn.DL_DIR, cmn.COL_RANK_FNAME)
+
+    if os.path.isfile(column_ranks_file):
+        logging.info("Creating global ranking ...")
+
+        df = pd.read_csv(column_ranks_file, sep="\t", index_col=0)
+
+        rank_dict = {}
+        n = len(df.index)
+        i = 1
+
+        for row in df.index:
+            logging.info("Processing global ranking for [Gene %s out of %s] '%s' ..." % (i, n, row))
+
+            r_sum = 0
+            r_min, r_max = df.loc[row].values[0], df.loc[row].values[0]
+            for val in df.loc[row].values:
+                r_sum += val
+                if val > r_max:
+                    r_max = val
+                if val < r_min:
+                    r_min = val
+
+            rank_dict[row] = (r_sum//len(df.loc[row].values), r_min, r_max)
+            i += 1
+
+            logging.info("Done.\n")
+
+        rank = enumerate(sorted(rank_dict.items(), key=operator.itemgetter(1)))
+
+        logging.info("Writing global ranking to file ...")
+
+        out_lines = ["\t".join(("Rank", "Gene_Code", "Avg_Col_Rank", "Min_Col_Rank", "Max_Col_Rank"))]+\
+                    ["\t".join((str(r), str(t[0]), str(t[1][0]), str(t[1][1]), str(t[1][2]))) for r, t in rank]
+        global_rank_file = os.path.join(cmn.DL_DIR, cmn.RANK_FNAME)
+        with open(global_rank_file, 'w') as out_file:
+            out_file.write("\n".join(out_lines))
+
+        logging.info("Done.\n")
+
+    else:
+        logging.warning("Column rankings file not found.\n")
+
+
+def run(g=False):
     """
     """
-    col_rank_genes()
+    if not g:
+        col_rank_genes()
+    global_rank_genes()

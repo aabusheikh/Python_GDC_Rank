@@ -33,6 +33,9 @@ PTEN_COMB_FNAME = "PTEN_combined.txt"
 # combined rankings file
 COL_RANK_FNAME = "column_ranks.txt"
 
+# global ranking file
+RANK_FNAME = "ranks.txt"
+
 # absolute directory path to download files to (recommended if project files are stored in
 # a space-sensitive location such as a cloud drive directory (Dropbox, OneDrive, etc...)
 ABS_DL_DIR = os.path.abspath(os.path.join(os.path.expanduser('~'), 'Downloads', 'GDC_Downloads'))

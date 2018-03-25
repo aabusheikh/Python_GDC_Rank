@@ -32,11 +32,16 @@ def main():
     start_time = time.time()
     logging.info("Starting program ...\n")       
 
+    g = False
+
     if "-ro" in sys.argv:
         logging.info("Detected 'rank only' command line argument, program will use pre-existing combined PTEN correlation file.\n")
+    elif "-gro" in sys.argv:
+        logging.info("Detected 'rank only' command line argument, program will use pre-existing column ranks file.\n")
+        g = True
     else:
         combine.run()
-    rank.run()
+    rank.run(g)
 
     logging.info("Finished running program.")
     run_time = time.time() - start_time
