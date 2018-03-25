@@ -66,16 +66,17 @@ def global_rank_genes():
         for row in df.index:
             logging.info("Processing global ranking for [Gene %s out of %s] '%s' ..." % (i, n, row))
 
-            ''' # Less efficient, but looks cleaner. also, O(3n) instead of O(n), so still O(n)
             r_vals = df.loc[row].values
+
+            ''' # Less efficient, but looks cleaner. also, O(3n) instead of O(n), so still O(n)
             r_sum = sum(r_vals)
             r_min = min(r_vals)
             r_max = max(r_vals)
             '''
 
             # Might be slightly more efficient, but looks less 'clean' -> O(n) instead of O(3n)
-            r_sum, r_min, r_max = 0, 0, 0
-            for val in df.loc[row].values:
+            r_sum, r_min, r_max = 0, r_vals[0], r_vals[0]
+            for val in r_vals:
                 r_sum += val
                 if val > r_max:
                     r_max = val
