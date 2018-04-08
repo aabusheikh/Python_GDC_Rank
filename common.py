@@ -21,9 +21,6 @@ PTEN_GENE_CODE = "ENSG00000171862.8"
 # correlation table file name template/pattern
 CORR_FNAME = "%s_%s_%s_%s_correlation.txt"
 
-# list of genes predicted from other research paper
-GENE_REF_FILE = os.path.join("ref", "GeneNameByScoreOrdered.ensembl_id.txt")
-
 # combined PTEN correlation file name
 PTEN_CORR_FNAME = "PTEN_correlation.txt"
 
@@ -32,6 +29,15 @@ PTEN_COMB_FNAME = "PTEN_combined.txt"
 
 # combined rankings file
 COL_RANK_FNAME = "column_ranks.txt"
+
+# avg correlation file
+AVG_CORR_FNAME = "PTEN_combined.fixed.txt"
+
+# ensemble to gene name dictionary
+GENE_ID_DICT_FNAME = "mart_export_Gene_Name_Id.txt"
+
+# other paper's target sequence analysis results
+OTHER_PAPER_FNAME = "PTEN_ceRNAs.txt"
 
 # global ranking file
 RANK_FNAME = "ranks.txt"

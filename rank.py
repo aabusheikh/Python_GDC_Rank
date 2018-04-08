@@ -53,11 +53,17 @@ def global_rank_genes():
     :return:
     """
     column_ranks_file = os.path.join(cmn.DL_DIR, cmn.COL_RANK_FNAME)
+    avg_corr_file = os.path.join("ref", cmn.AVG_CORR_FNAME)
+    gene_dict_file = os.path.join("ref", cmn.GENE_ID_DICT_FNAME)
+    target_seq_file = os.path.join("ref", cmn.OTHER_PAPER_FNAME)
 
     if os.path.isfile(column_ranks_file):
         logging.info("Creating global ranking ...")
 
         df = pd.read_csv(column_ranks_file, sep="\t", index_col=0)
+        avg_corr_df = pd.read_csv(avg_corr_file, sep="\t", index_col=0)
+        gene_dict_df = pd.read_csv(gene_dict_file, sep="\t", index_col=0)
+        target_seq_df = pd.read_csv(target_seq_file, sep="\t", index_col=0)
 
         rank_dict = {}
         n = len(df.index)
@@ -83,18 +89,34 @@ def global_rank_genes():
                 if val < r_min:
                     r_min = val
 
+            try:
+                avg_corr = avg_corr_df.loc[row][0]
+            except:
+                avg_corr = None
 
-            rank_dict[row] = (r_sum//len(df.loc[row].values), r_min, r_max)
+            try:
+                target_seq_score = target_seq_df.loc[gene_dict_df.loc[row.split('.')[0]][0]]["score"]
+            except:
+                target_seq_score = None
+
+            rank_dict[row] = (r_sum//len(df.loc[row].values), r_min, r_max, avg_corr, target_seq_score)
             i += 1
 
             logging.info("Done.\n")
 
         rank = enumerate(sorted(rank_dict.items(), key=operator.itemgetter(1)))
 
+
+
         logging.info("Writing global ranking to file ...")
 
-        out_lines = ["\t".join(("Rank", "Gene_Code", "Avg_Col_Rank", "Min_Col_Rank", "Max_Col_Rank"))]+\
-                    ["\t".join((str(r), str(t[0]), str(t[1][0]), str(t[1][1]), str(t[1][2]))) for r, t in rank]
+        out_lines = [
+                        "\t".join(("Rank", "Gene_Code", "Avg_Col_Rank", "Min_Col_Rank", "Max_Col_Rank",
+                                   "Avg_Correlation", "Target_Seq_Score"))
+                    ]+[
+                        "\t".join((str(r), str(t[0]), str(t[1][0]), str(t[1][1]), str(t[1][2]),
+                                   str(t[1][3]), str(t[1][4]))) for r, t in rank
+                    ]
         global_rank_file = os.path.join(cmn.DL_DIR, cmn.RANK_FNAME)
         with open(global_rank_file, 'w') as out_file:
             out_file.write("\n".join(out_lines))
